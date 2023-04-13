@@ -213,7 +213,8 @@ def monitor_all_configured_sensors():
 		"sensor_id" : sensorID,
 		"sensor_type" : sensor_type,
 		"value_index" : value_index,
-		"soil_condition" : soil_condition
+		"soil_condition" : soil_condition,
+		"sensor_value" : sensor_value
 	}
 	"""
 	iiwa_devices_data = []
@@ -222,6 +223,7 @@ def monitor_all_configured_sensors():
 	soil_type = 'undefined'
 	value_index = 'undefined'
 	soil_condition = ''
+	sensor_value = ''
 
 	number_of_iiwa_configurations = 0
 	
@@ -260,6 +262,7 @@ def monitor_all_configured_sensors():
 
 					sensor_type = read_iiwa_configurations['sensors'][x]['value']['sensor_type']
 					soil_type = read_iiwa_configurations['sensors'][x]['value']['soil_type']
+					sensor_value = str(last_PostedSensorValue)
 
 					if sensor_type == 'capacitive':
 						capacitive_soil_index_and_condition = get_capacitive_soil_condition(
@@ -279,7 +282,8 @@ def monitor_all_configured_sensors():
 						"sensor_id" : sensorID,
 						"sensor_type" : sensor_type,
 						"value_index" : value_index,
-						"soil_condition" : soil_condition
+						"soil_condition" : soil_condition,
+						"sensor_value" : sensor_value					
 					})
 				
 				# reset variables
@@ -287,6 +291,7 @@ def monitor_all_configured_sensors():
 				soil_type = 'undefined'
 				value_index = 'undefined'
 				soil_condition = ''
+				sensor_value = ''
 
 			return iiwa_devices_data
 
@@ -719,7 +724,10 @@ def iiwa_remove_device_function(deviceID):
 		# print("iiwa_sensors_configurations.json : %s"%iiwa_sensors_configurations)
 		globals_soil_salinity = iiwa_sensors_config_data['globals']['soil_salinity']
 		globals_soil_bulk_density = iiwa_sensors_config_data['globals']['soil_bulk_density']
-		global_region = iiwa_sensors_config_data['globals']['region']
+		global_soil_field_capacity = iiwa_sensors_config_data['globals']['soil_field_capacity']
+		global_weather_region = iiwa_sensors_config_data['globals']['weather_region']
+		global_weather_weekly_evaporation = iiwa_sensors_config_data['globals']['weather_weekly_evaporation']
+		global_weather_weekly_pluviometry = iiwa_sensors_config_data['globals']['weather_weekly_pluviometry']
 
 		iiwa_configured_sensors_count = len(iiwa_sensors_configurations)
 		pop_indices = []
@@ -730,17 +738,19 @@ def iiwa_remove_device_function(deviceID):
 		for b in range(0, len(pop_indices)):
 			iiwa_sensors_configurations.pop(pop_indices[b])
 
-		print("IIWA : New sensor(s) configuration(s) data to be saved in JSON: %s" % iiwa_sensors_configurations)
-
 		# save new data to config file
 		new_iiwa_sensors_configurations = {
 			"globals": {
 				"soil_salinity": globals_soil_salinity,
 				"soil_bulk_density": globals_soil_bulk_density,
-				"region" : global_region
+				"soil_field_capacity": global_soil_field_capacity,
+				"weather_region" : global_weather_region,
+				"weather_weekly_evaporation": global_weather_weekly_evaporation,
+				"weather_weekly_pluviometry": global_weather_weekly_pluviometry
 			},
 			"sensors": iiwa_sensors_configurations
 		}
+		print("IIWA : New sensor(s) configuration(s) data to be saved in JSON: %s" % iiwa_sensors_configurations)
 		# update with the sensor config
 		jsString = json.dumps(new_iiwa_sensors_configurations)
 		jsFile = open(iiwa_sensors_config_filename, "w")
